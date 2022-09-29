@@ -1,4 +1,4 @@
-package leetcode.question3;
+package leetcode.question0003;
 
 import java.util.HashMap;
 import java.util.HashSet;

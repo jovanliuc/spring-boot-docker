@@ -1,4 +1,4 @@
-package leetcode.question2;
+package leetcode.question0002;
 
 public class TowNumbersAddition {
 
