@@ -20,8 +20,22 @@ public class NodeTest {
         header.next.next.next.next.data = "E";
         header.next.next.next.next.next = null;
 
-        header = remove(header, 1);
-        printNodes(header);
+        traverseListNode(header);
+    }
+
+    public static void traverse(Node header) {
+        for (Node p = header; p != null; p = p.next) {
+            System.out.print(p.data + " > ");
+        }
+    }
+
+    public static void traverseListNode(Node header) {
+        if (header == null) {
+            return;
+        } else {
+            System.out.print(header.data + " > ");
+            traverseListNode(header.next);
+        }
     }
 
     public static String get(Node header, int index) {
