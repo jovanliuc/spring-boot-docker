@@ -17,10 +17,18 @@ public class Solution3 {
         root.right.left = new TreeNode(60);
         root.right.right = new TreeNode(80);
 
-        traverse(root);
+        int maxDepth = maxDepth(root);
+        System.out.println(maxDepth);
     }
 
-    void traverse(TreeNode root) {
+    int maxDepth(TreeNode root) {
+        if (root == null) {
+            return 0;
+        }
 
+        int maxLeftDepth = maxDepth(root.left);
+        int maxRightDepth = maxDepth(root.right);
+
+        return maxLeftDepth > maxRightDepth ? maxLeftDepth + 1 : maxRightDepth + 1;
     }
 }
