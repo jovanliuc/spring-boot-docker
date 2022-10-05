@@ -1,6 +1,6 @@
 package datastructure.tree;
 
-public class BST {
+public class Solution {
 
     public static void main(String[] args) {
         TreeNode root = new TreeNode(9);
