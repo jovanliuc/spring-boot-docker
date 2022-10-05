@@ -1,4 +1,4 @@
-package datastructure.tree;
+package leetcode.question0104;
 
 public class TreeNode {
 
