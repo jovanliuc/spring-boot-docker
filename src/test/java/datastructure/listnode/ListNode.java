@@ -1,4 +1,4 @@
-package datastructure.linkedlist;
+package datastructure.listnode;
 
 public class ListNode {
 

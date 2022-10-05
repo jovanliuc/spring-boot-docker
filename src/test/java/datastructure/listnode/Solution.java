@@ -1,4 +1,4 @@
-package datastructure.linkedlist;
+package datastructure.listnode;
 
 import org.junit.jupiter.api.Test;
 
