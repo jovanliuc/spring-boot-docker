@@ -1,8 +1,7 @@
-package leetcode.question0102;
+package leetcode.question0107;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -18,11 +17,11 @@ public class Solution {
         root.left.right =  new TreeNode(50);
         root.right.left = new TreeNode(60);
         root.right.right = new TreeNode(80);
-        levelOrder(root);
+        levelOrderBottom(root);
     }
 
-    public List<List<Integer>> levelOrder(TreeNode root) {
-        List<List<Integer>> result = new ArrayList<>();
+    public List<List<Integer>> levelOrderBottom(TreeNode root) {
+        LinkedList<List<Integer>> result = new LinkedList<>();
         if (root == null) {
             return result;
         }
@@ -30,7 +29,7 @@ public class Solution {
         Queue<TreeNode> queue = new LinkedList<>();
         queue.offer(root);
         while (!queue.isEmpty()) {
-            List<Integer> level = new ArrayList<>();
+            LinkedList<Integer> level = new LinkedList<>();
             int size = queue.size();
             for (int i = 0; i < size; i++) {
                 TreeNode current = queue.poll();
@@ -42,7 +41,7 @@ public class Solution {
                     queue.add(current.right);
                 }
             }
-            result.add(level);
+            result.addFirst(level);
         }
 
         return result;
