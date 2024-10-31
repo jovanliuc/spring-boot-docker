@@ -58,6 +58,7 @@ spring:
         connection-timeout: 30000  # 获取连接的最大等待时间，单位为毫秒
         pool-name: DB2HikariPool
         auto-commit: true  # 确保事务自动提交设置为适当值，适用于应用程序场景
+        schema: your-db2-default-schema  # 设置默认的schema
     oracle:
       hikari:
         jdbc-url: jdbc:oracle:thin:@your-oracle-host:1521/your-service-name
@@ -71,6 +72,7 @@ spring:
         connection-timeout: 30000  # 获取连接的最大等待时间，单位为毫秒
         pool-name: OracleHikariPool
         auto-commit: true  # 确保事务自动提交设置为适当值，适用于应用程序场景
+        schema: your-oracle-default-schema  # 设置默认的schema
   jpa:
     hibernate:
       ddl-auto: none
@@ -79,6 +81,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.DB2Dialect, org.hibernate.dialect.Oracle12cDialect
         dialect_resolvers: org.hibernate.dialect.resolver.StandardDialectResolver,org.hibernate.dialect.resolver.DB2DialectResolver,org.hibernate.dialect.resolver.OracleDialectResolver
+        format_sql: true  # 格式化SQL输出，使其更易于阅读
+        use_sql_comments: true  # 启用SQL注释以便于调试和日志记录
 
 jasypt:
   encryptor:
@@ -89,7 +93,7 @@ jasypt:
 
 ### 3. 数据源配置类
 
-创建Java配置类，用于手动配置DB2和Oracle数据源，使用Spring的`@Configuration`注解。
+更新Java配置类以使用`@ConfigurationProperties`从YAML中读取配置，而不是手动在代码中提供数据源信息。
 
 ```java
 package com.example.demo.config;
@@ -97,6 +101,7 @@ package com.example.demo.config;
 import javax.sql.DataSource;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -114,24 +119,16 @@ public class DataSourceConfig {
 
     @Bean(name = "db2DataSource")
     @Qualifier("db2DataSource")
+    @ConfigurationProperties(prefix = "spring.datasource.db2.hikari")
     public DataSource db2DataSource() {
-        return DataSourceBuilder.create()
-                .driverClassName("com.ibm.db2.jcc.DB2Driver")
-                .url("jdbc:db2://your-db2-host:50000/your-db2-database")
-                .username("your-db2-username")
-                .password("your-db2-password")
-                .build();
+        return DataSourceBuilder.create().build();
     }
 
     @Bean(name = "oracleDataSource")
     @Qualifier("oracleDataSource")
+    @ConfigurationProperties(prefix = "spring.datasource.oracle.hikari")
     public DataSource oracleDataSource() {
-        return DataSourceBuilder.create()
-                .driverClassName("oracle.jdbc.OracleDriver")
-                .url("jdbc:oracle:thin:@your-oracle-host:1521/your-service-name")
-                .username("your-oracle-username")
-                .password("your-oracle-password")
-                .build();
+        return DataSourceBuilder.create().build();
     }
 
     @Bean(name = "db2EntityManagerFactory")
@@ -140,6 +137,7 @@ public class DataSourceConfig {
         em.setDataSource(db2DataSource());
         em.setPackagesToScan("com.example.demo.model.db2");
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        em.getJpaPropertyMap().put("hibernate.default_schema", "your-db2-default-schema");
         return em;
     }
 
@@ -149,6 +147,7 @@ public class DataSourceConfig {
         em.setDataSource(oracleDataSource());
         em.setPackagesToScan("com.example.demo.model.oracle");
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
+        em.getJpaPropertyMap().put("hibernate.default_schema", "your-oracle-default-schema");
         return em;
     }
 
