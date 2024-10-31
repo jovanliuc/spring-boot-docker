@@ -137,7 +137,6 @@ public class DataSourceConfig {
         em.setDataSource(db2DataSource());
         em.setPackagesToScan("com.example.demo.model.db2");
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-        em.getJpaPropertyMap().put("hibernate.default_schema", "your-db2-default-schema");
         return em;
     }
 
@@ -147,7 +146,6 @@ public class DataSourceConfig {
         em.setDataSource(oracleDataSource());
         em.setPackagesToScan("com.example.demo.model.oracle");
         em.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-        em.getJpaPropertyMap().put("hibernate.default_schema", "your-oracle-default-schema");
         return em;
     }
 
@@ -223,27 +221,27 @@ public interface OracleRepository extends JpaRepository<OracleEntity, Long> {
 }
 ```
 
-### 5. 控制器
+### 5. 调度任务 - 从DB2到Oracle的数据迁移
 
-创建一个REST控制器用于测试是否可以从两个数据库中读取数据。
+使用Spring的调度器每天凌晨00:00:00执行数据迁移操作。
 
 ```java
-package com.example.demo.controller;
+package com.example.demo.scheduler;
 
 import com.example.demo.model.db2.DB2Entity;
 import com.example.demo.model.oracle.OracleEntity;
 import com.example.demo.repository.DB2Repository;
 import com.example.demo.repository.OracleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/api")
-public class DatabaseController {
+@Component
+@EnableScheduling
+public class DataMigrationScheduler {
 
     @Autowired
     private DB2Repository db2Repository;
@@ -251,13 +249,22 @@ public class DatabaseController {
     @Autowired
     private OracleRepository oracleRepository;
 
-    @GetMapping("/db2")
-    public List<DB2Entity> getAllDB2Entities() {
-        return db2Repository.findAll();
-    }
+    @Scheduled(cron = "0 0 0 * * ?")  // 每天凌晨00:00:00执行
+    public void migrateDataFromDb2ToOracle() {
+        // 从DB2中读取所有数据
+        List<DB2Entity> db2Entities = db2Repository.findAll();
 
-    @GetMapping("/oracle")
-    public List<OracleEntity> getAllOracleEntities() {
-        return oracleRepository.findAll();
+        // 遍历DB2的数据并插入到Oracle中
+        for (DB2Entity db2Entity : db2Entities) {
+            OracleEntity oracleEntity = new OracleEntity();
+            oracleEntity.setId(db2Entity.getId());
+            oracleEntity.setName(db2Entity.getName());
+            oracleRepository.save(oracleEntity);
+        }
+
+        System.out.println("Data migration from DB2 to Oracle completed successfully.");
     }
 }
+```
+
+在这个示例中，`DataMigrationScheduler`类使用Spring的`@Scheduled`注解，每天在凌晨00:00:00执行一次数据迁移任务，从DB2数据库中读取所有记录，并将其插入到Oracle数据库中。
